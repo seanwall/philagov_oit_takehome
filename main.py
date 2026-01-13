@@ -71,9 +71,9 @@ def fetch_opa_account_nums(addresses):
 if __name__ == "__main__":
     # Create a sqlite DB to hold all our fetched data
     db_filename = "philagov.db"
-    if os.path.isfile(db_filename):
-        os.remove(db_filename)
-        print("removed db file")
+    # if os.path.isfile(db_filename):
+    #     os.remove(db_filename)
+    #     print("removed db file")
     db = sqlite_utils.Database(db_filename)
 
     # Query 311 tickets and insert into 'public_cases_fc' table in our SQLite DB
@@ -81,11 +81,11 @@ if __name__ == "__main__":
     #     cause problems with how the carto API parses SQL queries passed as query params in the URL. This is not ideal, but there aren't any agencies
     #     other than License & Inspections that match, so I'm fine with it for the sake of this takehome.
     print("Fetching 311 Tickets...")
-    query_phl_carto(db, "public_cases_fc", "SELECT service_request_id, address, agency_responsible, status, requested_datetime, closed_datetime FROM public_cases_fc WHERE requested_datetime>='2025-01-01' AND requested_datetime<'2026-01-01' AND agency_responsible LIKE 'License%' AND address IS NOT NULL AND address NOT IN ('-','.');")
+    #query_phl_carto(db, "public_cases_fc", "SELECT service_request_id, address, agency_responsible, status, requested_datetime, closed_datetime FROM public_cases_fc WHERE requested_datetime>='2025-01-01' AND requested_datetime<'2026-01-01' AND agency_responsible LIKE 'License%' AND address IS NOT NULL AND address NOT IN ('-','.');")
 
     # Query Licenses & Inspections violations
     print("Fetching Violations...")
-    query_phl_carto(db, "violations", "SELECT casenumber, opa_account_num, address, casestatus, violationdate, casecreateddate, casecompleteddate FROM violations WHERE casecreateddate>='2025-01-01' AND casecreateddate<'2026-01-01'")
+    #query_phl_carto(db, "violations", "SELECT casenumber, opa_account_num, address, casestatus, violationdate, casecreateddate, casecompleteddate FROM violations WHERE casecreateddate>='2025-01-01' AND casecreateddate<'2026-01-01'")
 
 
     # Get unique addresses from public cases dataset
@@ -93,8 +93,15 @@ if __name__ == "__main__":
     cur = con.cursor()
     res = cur.execute('SELECT DISTINCT address FROM public_cases_fc;')
     addresses = [row[0] for row in res.fetchall()]
+    print(f"total addresses: {len(addresses)}")
+    res = cur.execute('SELECT DISTINCT address FROM address_to_opa_account_num;')
+    opa_account_nums = [row[0] for row in res.fetchall()]
+    print(f"current fetched: {len(opa_account_nums)}")
+    res = cur.execute('SELECT DISTINCT address FROM public_cases_fc EXCEPT SELECT address FROM address_to_opa_account_num;')
+    missing = [row[0] for row in res.fetchall()]
+    print(f"missing: {len(missing)}")
 
     # Fetch Address -> opa_account_num from AIS API
     print("Fetching opa_account_nums...")
-    address_opa_records = fetch_opa_account_nums(addresses)
+    address_opa_records = fetch_opa_account_nums(missing)
     db["address_to_opa_account_num"].insert_all(address_opa_records)
