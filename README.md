@@ -60,7 +60,5 @@ For this, I want the number of 311 Tickets which have an address with an `opa_ac
 
 I interpreted the question as being what percent *of the tickets that have a violation* have an open violation, so (num tickets with open violation)/(num tickets with violaion) = `63.11%`
 
-## Epilogue
 
-Sorry for the long winded README! I'll note that I have not run my script to completion from start to finish for 2025. The wait time for the AIS API requests is long and would make for a hefty cycle time. The analysis above is for the 2025 dataset, but I've uploaded the repo looking at tickets and violations so far in 2026, which is a much more reasonable runtime and 
-
+Sorry for the long-winded README.md, thanks for your time!
