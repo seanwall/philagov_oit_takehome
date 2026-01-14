@@ -42,23 +42,23 @@ I decided that *any* (311 ticket, violation) pair with matching addresses (by wa
 
 ## Analysis
 
-### How many service requests since the beginning of the year has 311 associated with “License & Inspections” as the agency_responsible?** = `44,748`
+### How many service requests since the beginning of the year has 311 associated with “License & Inspections” as the agency_responsible? = `44,748`
 
 Since I did this filter in the carto query, this is just `SELECT COUNT(*) FROM public_cases_fc;`: `44748`.
 
-### What percentage of these service requests have resulted in the issuance of a code violation?** = `55.46%`
+### What percentage of these service requests have resulted in the issuance of a code violation? = `55.46%`
 
 For this, I want the number of 311 Tickets which have an address with an `opa_account_number` that shows up in `violations`. To get this I join the 311 tickets to my opa_account_num dataset, and get a COUNT of all rows that have an opa_account_num in `violations`.
 
 `SELECT COUNT(*) FROM public_cases_fc pc JOIN address_to_opa_account_num oan ON pc.address=oan.address WHERE oan.opa_account_num IN (SELECT DISTINCT opa_account_num FROM violations);`= `24,817`
 Percent of all 311 tickets = `55.46%`
 
-### What percentage of these service requests have not been closed? (i.e. L&I has not finished inspecting them)* = `63.11%`
-For this, I want the number of 311 Tickets which have an address with an `opa_account_number` that shows up in `violations` AND shows up in a row in `violations` where `case_status` is not `CLOSED`.
+### What percentage of these service requests have not been closed? (i.e. L&I has not finished inspecting them) = `63.11%`
+For this, I want the number of 311 Tickets which have an address with an `opa_account_number` that shows up in a row in `violations` AND that row in `violations` has a `case_status` that is not `CLOSED`.
 
 `SELECT COUNT(*) FROM public_cases_fc pc JOIN address_to_opa_account_num oan ON pc.address=oan.address WHERE oan.opa_account_num IN (SELECT DISTINCT opa_account_num FROM violations WHERE casestatus!='CLOSED');` = `15,663`
 
-I interpreted the question as being what percent *of the tickets that have a violation* have an open violation, so (num tickets with open violation)/(num tickets with violaion) = `63.11%`
+I interpreted the question as being what percent *of the tickets that have a violation* have an open violation, so (num tickets with open violation)/(num tickets with violation) = `63.11%`
 
 
 Sorry for the long-winded README.md, thanks for your time!
